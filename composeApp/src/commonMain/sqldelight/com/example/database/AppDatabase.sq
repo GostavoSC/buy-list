@@ -1,0 +1,47 @@
+-- Tabela para armazenar listas
+CREATE TABLE lists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Mantemos o ID como texto para corresponder ao JSON
+    title TEXT NOT NULL,
+    description TEXT
+);
+
+-- Tabela para armazenar os itens de cada lista
+CREATE TABLE items (
+    item_id TEXT PRIMARY KEY,  -- ID único do item
+    list_id TEXT NOT NULL,  -- Relacionamento com a lista
+    title TEXT NOT NULL,
+    is_checked INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
+    FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
+);
+
+-- Recuperar todas as listas para a tela inicial
+selectAllLists:
+SELECT * FROM lists ORDER BY id DESC;
+
+-- Recuperar uma lista específica pelo ID
+selectListById:
+SELECT * FROM lists WHERE id = ?;
+
+-- Recuperar os itens de uma lista específica
+selectItemsByListId:
+SELECT * FROM items WHERE list_id = ?;
+
+-- Inserir uma nova lista
+insertList:
+INSERT INTO lists (title, description) VALUES (?, ?);
+
+-- Inserir um novo item na lista
+insertItem:
+INSERT INTO items (item_id, list_id, title, is_checked) VALUES (?, ?, ?, ?);
+
+-- Atualizar o status do item
+updateItemCheck:
+UPDATE items SET is_checked = ? WHERE item_id = ?;
+
+-- Deletar uma lista e seus itens
+deleteList:
+DELETE FROM lists WHERE id = ?;
+
+-- Deletar um item específico
+deleteItem:
+DELETE FROM items WHERE item_id = ?;
