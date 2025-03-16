@@ -7,32 +7,37 @@ import com.example.database.Lists as DataBaseList
 
 class ListsUseCase(
     private val repository: BuyListRepository,
-    private val listMapper: ModelMapper<List<DataBaseList>, List<Lists>>,
+    private val listsMapper: ModelMapper<List<DataBaseList>, List<Lists>>,
+    private val listMapper: ModelMapper<DataBaseList, Lists>,
     private val insertListMapper: ModelMapper<Lists, DataBaseList>
 ) {
-    suspend fun getLists(): ListResult {
-        try {
-            val result = listMapper(repository.getLists())
-
-            return ListResult.Success(result)
-        } catch (t: Throwable) {
-            return ListResult.Error(t.message ?: "Unknown error")
-        }
+    suspend fun getLists(): Result<List<Lists>> = executeWithResult {
+        listsMapper(repository.getLists())
     }
 
-    suspend fun insertList(list: Lists): ListResult {
-        try {
-            repository.insertList(insertListMapper(list))
-            return ListResult.SuccessNoBody
-        } catch (t: Throwable) {
-            return ListResult.Error(t.message ?: "Unknown error")
-        }
+    suspend fun getListById(listId: Long): Result<Lists> = executeWithResult {
+        listMapper(repository.getListById(listId))
     }
 
+    suspend fun insertList(list: Lists): Result<Lists> = executeWithResult {
+        listMapper(repository.insertList(insertListMapper(list)))
+    }
+
+    suspend fun deleteList(id: Long): Result<Unit> = executeWithResult {
+        repository.deleteList(id)
+    }
 }
 
-sealed class ListResult {
-    data class Success(val lists: List<Lists>) : ListResult()
-    data object SuccessNoBody : ListResult()
-    data class Error(val message: String) : ListResult()
+
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+}
+
+inline fun <T> executeWithResult(action: () -> T): Result<T> {
+    return try {
+        Result.Success(action())
+    } catch (t: Throwable) {
+        Result.Error(t.message ?: "Unknown error")
+    }
 }

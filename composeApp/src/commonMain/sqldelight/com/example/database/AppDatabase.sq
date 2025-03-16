@@ -7,8 +7,9 @@ CREATE TABLE lists (
 
 -- Tabela para armazenar os itens de cada lista
 CREATE TABLE items (
-    item_id TEXT PRIMARY KEY,  -- ID único do item
-    list_id TEXT NOT NULL,  -- Relacionamento com a lista
+    item_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- ID único do item
+    list_id INTEGER NOT NULL,  -- Relacionamento com a lista
+    description TEXT,
     title TEXT NOT NULL,
     is_checked INTEGER NOT NULL DEFAULT 0, -- 0 = false, 1 = true
     FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE
@@ -30,9 +31,15 @@ SELECT * FROM items WHERE list_id = ?;
 insertList:
 INSERT INTO lists (title, description) VALUES (?, ?);
 
+getLastInsertedList:
+SELECT * FROM lists WHERE id = last_insert_rowid();
+
 -- Inserir um novo item na lista
 insertItem:
-INSERT INTO items (item_id, list_id, title, is_checked) VALUES (?, ?, ?, ?);
+INSERT INTO items (list_id, title, is_checked) VALUES (?, ?, ?);
+
+updateItem:
+UPDATE items SET title = ?, is_checked = ? , description = ? WHERE item_id = ?;
 
 -- Atualizar o status do item
 updateItemCheck:

@@ -2,9 +2,8 @@ package com.gstv.buylist.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gstv.buylist.domain.use_case.ListResult
 import com.gstv.buylist.domain.use_case.ListsUseCase
-import com.gstv.buylist.model.Lists
+import com.gstv.buylist.domain.use_case.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -24,29 +23,19 @@ class HomeViewModel(
     fun fetchLists() {
         viewModelScope.launch {
             when (val result = listsUseCase.getLists()) {
-                is ListResult.Success -> {
+                is Result.Success -> {
                     _state.update {
                         it.copy(
-                            lists = result.lists
+                            lists = result.data
                         )
                     }
                 }
-                is ListResult.Error -> {
+
+                is Result.Error -> {
                     // Handle error
                 }
-                else -> {}
-            }
-        }
-    }
 
-    fun insertList() {
-        viewModelScope.launch {
-            listsUseCase.insertList(
-                Lists(
-                    title = "teste",
-                    description = "teste"
-                )
-            )
+            }
         }
     }
 }

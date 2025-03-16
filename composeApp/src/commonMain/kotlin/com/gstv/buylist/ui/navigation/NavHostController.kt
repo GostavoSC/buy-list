@@ -10,9 +10,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gstv.buylist.ui.screens.HistoryScreen
+import com.gstv.buylist.ui.screens.history.HistoryScreen
 import com.gstv.buylist.ui.screens.home.HomeScreen
-import com.gstv.buylist.ui.screens.NewListScreen
+import com.gstv.buylist.ui.screens.creation.NewListScreen
 
 @Composable
 fun BuyListColorsNavHostController(navController: NavHostController = rememberNavController()) {
@@ -27,23 +27,35 @@ fun BuyListColorsNavHostController(navController: NavHostController = rememberNa
                 },
                 onNewListClick = {
                     navController.navigate(Routes.NewListManually.route)
+                },
+                onRecentClicked = {
+                    navController.currentBackStackEntry?.savedStateHandle?.set("listId", it)
+                    navController.navigate(Routes.NewListManually.route)
                 }
             )
         }
 
         slideInComposable(
             route = Routes.History.route
-        ){
-            HistoryScreen {
-                navController.popBackStack()
-            }
+        ) {
+            HistoryScreen(
+                onItemClicked = {
+                    navController.currentBackStackEntry?.savedStateHandle?.set("listId", it)
+                    navController.navigate(Routes.NewListManually.route)
+                },
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+            )
         }
 
 
         slideInComposable(
             Routes.NewListManually.route
         ) {
+            val id = navController.previousBackStackEntry?.savedStateHandle?.get<Long>("listId")
             NewListScreen(
+                listId = id,
                 onBackPressed = {
                     navController.popBackStack()
                 }
@@ -58,7 +70,7 @@ private fun NavGraphBuilder.slideInComposable(route: String, content: @Composabl
         route = route,
         enterTransition = { fadeIn() + slideInHorizontally(initialOffsetX = { 300 }) },
         exitTransition = { fadeOut() + slideOutHorizontally(targetOffsetX = { 300 }) }
-    ){
+    ) {
         content()
     }
 }

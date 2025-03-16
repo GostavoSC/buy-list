@@ -1,8 +1,10 @@
 package com.gstv.buylist.ui.screens.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -30,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gstv.buylist.ui.core.OutlinedButton
 import com.gstv.buylist.ui.theme.BuyListColors
@@ -41,7 +46,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinInject(),
     onHistoryClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onNewListClick: () -> Unit = {}
+    onNewListClick: () -> Unit = {},
+    onRecentClicked: (listId: Long) -> Unit = {}
 ) {
     val state = viewModel.state.collectAsState().value
     Surface(
@@ -51,7 +57,8 @@ fun HomeScreen(
             homeState = state,
             onHistoryClick = onHistoryClick,
             onSettingsClick = onSettingsClick,
-            onNewListClick = onNewListClick
+            onNewListClick = onNewListClick,
+            onRecentClicked = onRecentClicked
         )
     }
 
@@ -68,6 +75,7 @@ private fun HomeScreenContent(
     onNewListClick: () -> Unit = {},
     onHistoryClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
+    onRecentClicked: (listId: Long) -> Unit = {},
     onNewListAIClick: () -> Unit = {}
 ) {
     Column(
@@ -80,6 +88,7 @@ private fun HomeScreenContent(
             onHistoryClick = onHistoryClick,
             onSettingsClick = onSettingsClick,
             onNewListAIClick = onNewListAIClick,
+            onRecentClicked = onRecentClicked,
             state = homeState
         )
     }
@@ -114,7 +123,8 @@ private fun Body(
     onNewListClick: () -> Unit,
     onNewListAIClick: () -> Unit,
     onHistoryClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onRecentClicked: (listId: Long) -> Unit
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -137,10 +147,34 @@ private fun Body(
             title = "Recent Lists",
             icon = Icons.Default.List,
             content = {
-                if (state.lists.isNotEmpty()) {
-                    LazyColumn {
-                        items(state.lists) {
-                            Text(it.title)
+                if (state.getRecentList().isNotEmpty()) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(state.getRecentList()) {
+                            Button(
+                                onClick = {
+                                    onRecentClicked(it.id)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(
+                                    vertical = 12.dp,
+                                    horizontal = 14.dp
+                                ),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                ),
+                                border = BorderStroke(
+                                    1.dp, color = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Text(
+                                    it.title,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         }
                     }
                 } else {
@@ -185,15 +219,17 @@ private fun BodyCard(
     titleStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     icon: ImageVector,
     content: @Composable () -> Unit = {},
-    onClick: () -> Unit = {}
+    onClick: (() -> Unit?)? = null
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth()
+            .clickable(onClick != null) {
+                onClick?.invoke()
+            },
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(
             1.dp, color = Color.LightGray
         ),
-        onClick = onClick
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),

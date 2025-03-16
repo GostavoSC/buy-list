@@ -1,15 +1,14 @@
 package com.gstv.buylist.ui.core
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,10 +22,15 @@ fun BaseScreen(
     modifier: Modifier = Modifier,
     title: String,
     onBackPressed: () -> Unit = {},
-    content: @Composable () -> Unit
+    floatActionButton: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
+    content: @Composable (PaddingValues) -> Unit
 ) {
-    Surface(modifier = modifier.fillMaxSize()) {
-        Column {
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = floatActionButton,
+        bottomBar = bottomBar,
+        topBar = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 24.dp)
@@ -43,7 +47,8 @@ fun BaseScreen(
                     )
                 )
             }
-            content.invoke()
         }
+    ) {
+        content(it)
     }
 }

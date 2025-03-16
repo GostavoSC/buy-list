@@ -16,7 +16,7 @@ junit = "4.13.2"
 kotlin = "2.1.0"
 
 coroutinesVersion = "1.9.0"
-koin = "3.5.0"
+koin = "3.5.3"
 kotlinxSerializationCore = "1.6.2"
 kotlinxSerializationJson = "1.6.0"
 lifecycleViewmodelComposeVersion = "2.8.2"
